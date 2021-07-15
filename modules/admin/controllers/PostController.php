@@ -5,7 +5,9 @@ namespace app\modules\admin\controllers;
 use Yii;
 use app\models\Post;
 use app\models\PostSearch;
+use yii\db\Exception;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -66,13 +68,13 @@ class PostController extends Controller
     {
         $model = new Post();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+        if( $model->load(Yii::$app->request->post()) ) {
+            $model->user_id = Yii::$app->user->id;
+            if( $model->validate() && $model->save() ) {
+                return $this->redirect(['index']);
+            }
+        } else
+            return $this->render('create', ['model' => $model]);
     }
 
     /**
@@ -85,6 +87,10 @@ class PostController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+
+        if( !Yii::$app->user->can('updateOwnPost', ['post'=>$model]) ) {
+            throw new ForbiddenHttpException("Вам сюда нельзя");
+        }
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id]);
@@ -104,7 +110,13 @@ class PostController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+
+        if( Yii::$app->user->can('updateOwnPost', ['post'=>$model]) ) {
+            throw new ForbiddenHttpException("Вам сюда нельзя");
+        }
+
+        $model->delete();
 
         return $this->redirect(['index']);
     }

@@ -25,11 +25,16 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
             'id',
             'title',
             'description:ntext',
-            'user_id',
+//            'user_id',
+            [
+                'attribute' => 'user_id',
+                'value' => function($data) {
+                    return $data->user->email ? $data->user->username : 'Любой';
+                },
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
