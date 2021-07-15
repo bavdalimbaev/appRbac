@@ -6,7 +6,18 @@
     <br>
 </p>
 
-#-------------------------------
+Login TO Project
+
+-------------------
+
+      role                login            password 
+
+      admin               Admin            123123
+
+      manager             Manager          123123
+
+      user                User             123123
+
 
 [comment]: <> (<p align="center">)
 
